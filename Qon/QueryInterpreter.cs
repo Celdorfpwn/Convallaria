@@ -23,7 +23,6 @@ namespace Qon
                     properties.Add(property, value);
                 }
             }
-            Task.Delay(TimeSpan.FromSeconds(1)).Wait();
             if (properties.Count != 0)
             {
 

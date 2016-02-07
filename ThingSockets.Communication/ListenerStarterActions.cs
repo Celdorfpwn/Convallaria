@@ -6,43 +6,54 @@ using System.Threading.Tasks;
 using ThingSockets.External;
 using System.Net.NetworkInformation;
 using ThingSockets.Factory;
+using ThingSockets.Components;
 
 namespace ThingSockets.Communication
 {
     sealed class ListenerStarterActions : IListenerActions
     {
-
+        private int _currentPort { get; set; }
         private IListenerActions _actions { get; set; }
+
+        private List<IListener> _listeners { get; set; }
 
         public ListenerStarterActions(IListenerActions actions)
         {
             _actions = actions;
+            _listeners = new List<IListener>();
+            _currentPort = 2000;
         }
 
         public string Response(string message)
         {
-
-            return GetOpenPort().ToString();
+            return GetOpenPort();
         }
 
 
-        private int GetOpenPort()
+        private string GetOpenPort()
         {
-            var listener = SocketsFactory.Instance.CreateStreamListener();
-            for (var port = 2000;port <= 3000;port++)
+
+            IListener listener = _listeners.FirstOrDefault(existingListener => !existingListener.HasConnection);
+
+            if(listener!=null)
+            {
+                return listener.Port;
+            }
+
+            listener = SocketsFactory.Instance.CreateStreamListener();
+            while(true)
             {
                 try
                 {
-                    listener.Start(port, _actions);
-                    return port;
+                    listener.Start(_currentPort++, _actions);
+                    _listeners.Add(listener);
+                    return listener.Port;
                 }
                 catch
                 {
 
                 }
             }
-
-            return 0;
         }
     }
 }

@@ -14,51 +14,57 @@ namespace ThingSockets
 {
     public sealed class StreamListener : IListener
     {
+        public bool HasConnection { get; private set; }
         private StreamSocketListener _listener { get; set; }
 
-        private string _port { get; set; }
+        public string Port { get; private set; }
 
         private IListenerActions _actions { get; set; }
+
 
         public StreamListener()
         {
             _listener = new StreamSocketListener();
-            _listener.Control.KeepAlive = false;
             _listener.ConnectionReceived += ConnectionReceived;
         }
 
         public void Start(int port,IListenerActions actions)
         {
-            _port = port.ToString();
+            Port = port.ToString();
             _actions = actions;
-            _listener.BindServiceNameAsync(_port).AsTask().Wait();
+            _listener.BindServiceNameAsync(Port).AsTask().Wait();
         }
 
         private void ConnectionReceived(StreamSocketListener sender, StreamSocketListenerConnectionReceivedEventArgs args)
-        {           
-            Stream(args.Socket);
+        {
+            HasConnection = true;
+            var socket = new ComplexStreamSocket(args.Socket);
+            StartStreaming(socket);
+            HasConnection = false;
+        }
+
+        void StartStreaming(ComplexStreamSocket socket)
+        {
+            while (Stream(socket));
         }
 
 
-
-        private void Stream(StreamSocket socket)
+        private bool Stream(ComplexStreamSocket socket)
         {
-            bool continueStreaming = true; 
+            bool continueStreaming = true;
             try
             {
-                var message = _actions.Response(socket.InputStream.GetMessage());
-                continueStreaming = socket.OutputStream.WriteMessage(message);
+                var message = socket.DataReader.GetMessage();
+                var result = _actions.Response(message);
+                Debug.WriteLine("Sending " + message);
+                continueStreaming = socket.DataWriter.WriteMessage(result);
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 continueStreaming = false;
                 Debug.WriteLine(SocketError.GetStatus(exception.HResult));
             }
-
-            if (continueStreaming)
-            {
-                Stream(socket);
-            }
+            return continueStreaming;
         }
     }
 }

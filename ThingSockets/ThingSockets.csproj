@@ -108,6 +108,7 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComplexStreamSocket.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Listener.cs" />
     <Compile Include="Requester.cs" />

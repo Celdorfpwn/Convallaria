@@ -7,14 +7,17 @@ using System.Threading.Tasks;
 using ThingSockets.Components;
 using ThingSockets.External;
 using Windows.Networking.Sockets;
+using Windows.Storage.Streams;
 
 namespace ThingSockets
 {
     public sealed class Listener : IListener
     {
+        public bool HasConnection { get; private set; }
+
         private StreamSocketListener _listener { get; set; }
 
-        private string _port { get; set; }
+        public string Port { get; private set; }
 
         private IListenerActions _actions { get; set; }
 
@@ -26,22 +29,24 @@ namespace ThingSockets
         }
         public void Start(int port, IListenerActions actions)
         {
-            _port = port.ToString();
+            Port = port.ToString();
             _actions = actions;
-            _listener.BindServiceNameAsync(_port).AsTask().Wait();
+            _listener.BindServiceNameAsync(Port).AsTask().Wait();
         }
 
         private void ConnectionReceived(StreamSocketListener sender, StreamSocketListenerConnectionReceivedEventArgs args)
         {
+            HasConnection = true;
             try
             {
-                var message = _actions.Response(args.Socket.InputStream.GetMessage());
-                args.Socket.OutputStream.WriteMessage(message);
+                var message = _actions.Response(new DataReader(args.Socket.InputStream).GetMessage());
+                new DataWriter(args.Socket.OutputStream).WriteMessage(message);
             }
             catch (Exception exception)
             {
                 Debug.WriteLine(SocketError.GetStatus(exception.HResult));
             }
+            HasConnection = false;
         }
 
 

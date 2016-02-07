@@ -11,5 +11,9 @@ namespace ThingSockets.Components
     {
         void Start(int port,IListenerActions actions);
 
+        bool HasConnection { get; }
+
+        string Port { get; }
+
     }
 }

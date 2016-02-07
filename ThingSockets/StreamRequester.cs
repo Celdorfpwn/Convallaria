@@ -15,14 +15,14 @@ namespace ThingSockets
 {
     public sealed class StreamRequester : IRequester
     {
-        private StreamSocket _socket { get; set; }
+        private ComplexStreamSocket _socket { get; set; }
         IRequesterActions _actions { get; set; }
 
         IListenerAddress _address { get; set; }
 
         public StreamRequester()
         {
-            _socket = new StreamSocket();
+            _socket = new ComplexStreamSocket(new StreamSocket());
         }
 
         public void Request(IRequesterActions actions, IListenerAddress address)
@@ -32,9 +32,9 @@ namespace ThingSockets
             _address = address;
             try
             {
-                if (_socket.Information.RemoteAddress == null)
+                if (_socket.Socket.Information.RemoteAddress == null)
                 {
-                    _socket.ConnectAsync(new HostName(_address.Ip), _address.Port).AsTask().Wait();
+                    _socket.Socket.ConnectAsync(new HostName(_address.Ip), _address.Port).AsTask().Wait();
                 }
             }
             catch (Exception e)
@@ -45,32 +45,25 @@ namespace ThingSockets
 
             if(connected)
             {
-                Stream();
+                while(Stream());
             }
         }
 
-        private void Stream()
+        private bool Stream()
         {
+            var continueStreaming = true;
             try
             {
-                _socket.OutputStream.WriteMessage(_actions.Message);
-                var dataReader = new DataReader(_socket.InputStream);
-                IAsyncOperation<uint> stringHeader = dataReader.LoadAsync(4);
-                stringHeader.AsTask().Wait();
-                var strLength = dataReader.ReadUInt32();
-                IAsyncOperation<uint> taskLoad = dataReader.LoadAsync(strLength);
-                taskLoad.AsTask().Wait();
-                uint numStrBytes = taskLoad.GetResults();
-                string message = dataReader.ReadString(numStrBytes);
+                _socket.DataWriter.WriteMessage(_actions.Message);
+                string message = _socket.DataReader.GetMessage();
                 _actions.ReadMessageResult(message);
             }
             catch (Exception e)
             {
                 Debug.WriteLine(e.ToString());
-                return;
+                continueStreaming = false;
             }
-
-            Stream();
+            return continueStreaming;
         }
 
     }

@@ -28,7 +28,6 @@ namespace Qon
 
         public string Response(string message)
         {
-            Debug.WriteLine("Executing " + message);
             return _interpreter.GetJson(message, _dataProvider);
         }
 

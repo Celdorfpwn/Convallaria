@@ -8,6 +8,7 @@ using ThingSockets.Components;
 using ThingSockets.External;
 using Windows.Networking;
 using Windows.Networking.Sockets;
+using Windows.Storage.Streams;
 
 namespace ThingSockets
 {
@@ -42,8 +43,8 @@ namespace ThingSockets
         {
             try
             {
-                socket.OutputStream.WriteMessage(actions.Message);
-                var message = socket.InputStream.GetMessage();
+                new DataWriter(socket.OutputStream).WriteMessage(actions.Message);
+                var message = new DataReader(socket.InputStream).GetMessage();
                 actions.ReadMessageResult(message);
             }
             catch (Exception e)
