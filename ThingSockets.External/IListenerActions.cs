@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThingSockets
+namespace ThingSockets.External
 {
-    public interface IListenerIOActions
+    public interface IListenerActions
     {
-        void ReadInput(string message);
-
-        string GetOutput();
+        string Response(string message);
     }
 }

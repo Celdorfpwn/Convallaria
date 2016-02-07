@@ -4,84 +4,53 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Windows.Foundation;
+using ThingSockets.Components;
+using ThingSockets.External;
 using Windows.Networking;
 using Windows.Networking.Sockets;
-using Windows.Storage.Streams;
 
 namespace ThingSockets
 {
     public sealed class Requester : IRequester
     {
-        private StreamSocket _socket { get; set; }
-        IRequesterReader _requesterReader { get; set; }
-
-        IRequesterInfo _requesterInfo { get; set; }
 
 
-        public Requester(IRequesterInfo requesterInfo, IRequesterReader requesterReader)
+        public void Request(IRequesterActions actions, IListenerAddress address)
         {
-            _requesterInfo = requesterInfo;
-            _requesterReader = requesterReader;
-            _socket = new StreamSocket();
-        }
-
-        async public void Request()
-        {
+            bool connected = true;
+            StreamSocket socket = new StreamSocket();
             try
             {
-                if (_socket.Information.RemoteAddress == null)
+                if (socket.Information.RemoteAddress == null)
                 {
-                    await _socket.ConnectAsync(new HostName(_requesterInfo.Ip), _requesterInfo.Port);
-                    WriteMessage(_requesterReader.GetMessage());
-                    ReadInput();
+                    socket.ConnectAsync(new HostName(address.Ip), address.Port).AsTask().Wait();
                 }
             }
             catch (Exception e)
             {
+                connected = false;
                 Debug.WriteLine(e.ToString());
+            }
+
+            if (connected)
+            {
+                Send(actions,socket);
             }
         }
 
-        private void ReadInput()
+        private void Send(IRequesterActions actions, StreamSocket socket)
         {
             try
             {
-                var dataReader = new DataReader(_socket.InputStream);
-                IAsyncOperation<uint> stringHeader = dataReader.LoadAsync(4);
-                stringHeader.AsTask().Wait();
-                var strLength = dataReader.ReadUInt32();
-                IAsyncOperation<uint> taskLoad = dataReader.LoadAsync(strLength);
-                taskLoad.AsTask().Wait();
-                uint numStrBytes = taskLoad.GetResults();
-                string message = dataReader.ReadString(numStrBytes);
-                _requesterReader.ReadInput(message);
+                socket.OutputStream.WriteMessage(actions.Message);
+                var message = socket.InputStream.GetMessage();
+                actions.ReadMessageResult(message);
             }
             catch (Exception e)
             {
                 Debug.WriteLine(e.ToString());
+                return;
             }
-            finally
-            {
-                ReadInput();
-            }
-        }
-
-        async private void WriteMessage(string message)
-        {
-            using (var writer = new DataWriter(_socket.OutputStream))
-            {
-                var len = writer.MeasureString(message);
-                writer.WriteInt32((int)len);
-                writer.WriteString(message);
-                var ret = await writer.StoreAsync();
-                writer.DetachStream();
-            }
-        }
-
-        async public void Finish()
-        {
-            await _socket.CancelIOAsync();
         }
     }
 }

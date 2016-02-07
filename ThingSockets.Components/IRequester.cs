@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThingSockets.External;
 
-namespace ThingSockets
+namespace ThingSockets.Components
 {
     public interface IRequester
     {
-        void Request();
-
-        void Finish();
+        void Request(IRequesterActions actions, IListenerAddress address);
     }
 }

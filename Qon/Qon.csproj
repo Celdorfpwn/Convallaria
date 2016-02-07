@@ -108,13 +108,19 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NetworkQuery.cs" />
+    <Compile Include="QueryInterpreter.cs" />
     <Compile Include="QueryReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ThingSockets\ThingSockets.csproj">
-      <Project>{71a07dfc-7208-428c-9bcd-1d99d365b0d0}</Project>
-      <Name>ThingSockets</Name>
+    <ProjectReference Include="..\ThingSockets.Communication\ThingSockets.Communication.csproj">
+      <Project>{bf547e4c-1524-455e-a4db-43719b22174b}</Project>
+      <Name>ThingSockets.Communication</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThingSockets.External\ThingSockets.External.csproj">
+      <Project>{6f41ef7b-da20-4909-83b1-ae597ed8fd74}</Project>
+      <Name>ThingSockets.External</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

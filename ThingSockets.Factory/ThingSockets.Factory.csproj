@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{71A07DFC-7208-428C-9BCD-1D99D365B0D0}</ProjectGuid>
+    <ProjectGuid>{5894089F-9125-4F25-854D-8D82E36B61A0}</ProjectGuid>
     <OutputType>winmdobj</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ThingSockets</RootNamespace>
-    <AssemblyName>ThingSockets</AssemblyName>
+    <RootNamespace>ThingSockets.Factory</RootNamespace>
+    <AssemblyName>ThingSockets.Factory</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.10586.0</TargetPlatformVersion>
@@ -108,11 +108,7 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions.cs" />
-    <Compile Include="Listener.cs" />
-    <Compile Include="Requester.cs" />
-    <Compile Include="StreamListener.cs" />
-    <Compile Include="StreamRequester.cs" />
+    <Compile Include="SocketsFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -123,6 +119,10 @@
     <ProjectReference Include="..\ThingSockets.External\ThingSockets.External.csproj">
       <Project>{6f41ef7b-da20-4909-83b1-ae597ed8fd74}</Project>
       <Name>ThingSockets.External</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThingSockets\ThingSockets.csproj">
+      <Project>{71a07dfc-7208-428c-9bcd-1d99d365b0d0}</Project>
+      <Name>ThingSockets</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

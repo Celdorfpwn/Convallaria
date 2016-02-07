@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThingSockets
+namespace ThingSockets.External
 {
-    public interface IRequesterReader
+    public interface IListenerAddress
     {
-        void ReadInput(string message);
+        string Ip { get; }
 
-        string GetMessage();
+        string Port { get; }
     }
 }
